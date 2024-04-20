@@ -11,8 +11,8 @@ Error handling This is a very important change I am looking to implement quickly
 
 Adaptability of the engine This engine is supposed to be used for my future testing of various strategies. A big problem that I foresee coming is the limited availability of incorporating a new trading strategy. I developed the engine with a test strategy of Double Moving Averages Crossover. I will need to take precautions to make the engine more adaptable.
 
-_READABILITY AND PERFORMANCE
-_
+_READABILITY AND PERFORMANCE_
+
 Comments I need to streamline the comments in the code. I am not an expert software engineer and this project is going to test my abilities heavily. Introducing more specific comments and making the code more clear and readable will make life easier for any reader, including me. Because I will learn as I go, I will need to keep track of what exactly is going on in the code. In this project, it is especially important since I will be using the engine once I am finished developing it.
 
 Refactor and modularize The function apply_trading_system is very long and complex in its current form. I believe there is value in shortening it and breaking the function down into smaller and more focused functions. This should make the code more readable and make it easier to debug and maintain.
