@@ -26,44 +26,18 @@ Step 4 implements active trading and holding since the strategies will often mea
 
 Step 5 formats the data to create the final backtesting environment. I will need to refine this further as there are some inefficiencies in the apply_trading_system function. Backtesting is especially implemented in this function since the transaction costs, type of asset, starting available capital, long or short, order type, and entry levels are incorporated into the simulated performance.
 
-**What is next?**
-The following aspects I'm going to take a look at and work on further.
+# Notes on data used
 
-_OPTIMIZATION AND STREAMLINING_
-- Data handling is going to be optimized
-I received feedback that certain pandas functions like 'apply' can be optimized further. I am going to be looking at vectorized operations that could improve efficiency. When this engine is fully developed, I will be using it to analyze multiple assets at the same time (i.e. multithreading). This will mean that the need for optimization is already of great importance. 
+Modern literature and discussions with industry professionals have highlighted the importance of data validation and verification when it comes to a system like the one I am attempting to create. Any aspiring trader who wishes to backtest their strategies and gain insight into using them in real markets will need to understand the limitations that come with the certain packages and techniques that I have employed in the creation of this engine.
 
-- Make the variables actual variables (i.e. make them non-hardcoded)
-Right now, the parameters are hardcoded into the code. This is suitable for now, but I want to change it as soon as some other things are fixed. I am exploring different options for implementing these changes. I will also need to take a look at the data to see if the variables are working properly since I found some irregularities with for example transaction costs.
+## Yfinance
+The limit of the public API is 2000 requests per day. I will need to analyze the exact implications of this for my project. No matter the result I will need to consider this specifically for the engine when writing the code. Furthermore, the request limit might cause problems when strategies become more complex and more assets and types of derivatives are considered for investment. 
 
-- Error handling
-This is a very important change I am looking to implement quickly. Currently, no functions in the code handle errors and adapt the process to potential mistakes. To cover those bases, I am going to implement various error-handling techniques. I am going to focus on implementing feedback protocols if the information is substandard. I will be implementing this in the main script function of the code since I believe this is the most optimal to solve these potential problems.
+A problem with the use of yfinance is that intraday data is very limited. 1m data is available only for the last 7 days, and <1d data is available for the last 60 days only. This means that any testing of ex. HFT strategies would have a very limited timeframe. Therefore, one might conclude that as long as yfinance is used to retrieve price data, the engine is very limited in backtesting HFT strategies. 
 
-- Adaptability of the engine
-This engine is supposed to be used for my future testing of various strategies. A big problem that I foresee coming is the limited availability of incorporating a new trading strategy. I developed the engine with a test strategy of Double Moving Averages Crossover. I will need to take precautions to make the engine more adaptable.
+A problem with yfinance is that it retrieves data through HTML scraping on Yahoo Finance. The accuracy of the price data can be compromised by changes on the Yahoo Finance website. There is also the risk of getting rate limited or blacklisted. This is a risk with any web scraping method but this engine retrieves 36,414 million data points and therefore the risk becomes considerably bigger.
 
-_READABILITY AND PERFORMANCE_
-- Comments
-I need to streamline the comments in the code. I am not an expert software engineer and this project is going to test my abilities heavily. Introducing more specific comments and making the code more clear and readable will make life easier for any reader, including me. Because I will learn as I go, I will need to keep track of what exactly is going on in the code. In this project, it is especially important since I will be using the engine once I am finished developing it. 
+## Retreiving stock tickers
+I have decided to for the time being use a CSV file that contains currently traded stocks on public markets. I chose this method so my engine would be utilizing the whole market and not just a compiled list of more popular stocks (i.e. S&P500 or DJI). The data on currently traded stocks is found on the NASDAQ website (accessible from https://www.nasdaq.com/market-activity/stocks/screener). A CSV file was downloaded on the 16th of April 2024 and I only removed price-related information since the engine is getting that from Yfinance.
 
-- Refactor and modularize
-The function apply_trading_system is very long and complex in its current form. I believe there is value in shortening it and breaking the function down into smaller and more focused functions. This should make the code more readable and make it easier to debug and maintain. 
-
-_NEW FEATURES_
-- Market-wide investing
-This is the most important planned feature of my engine. According to NYSE, there are around 8000 listed securities that are publically traded. My engine is right now only implementing the trading strategy for one given security. Looking at less than 0,0125% of the market is not a great representation of the market, so I am working to implement this change quickly. This will require a lot more computing power and therefore this development might require its own branch.
-
-- Fluid transaction costs
-The engine assumes in its current form that transaction costs are constant (i.e. 50-cent to enter position, and 50 cent to exit position). Considering the irregularities I found earlier and the constant nature of the variable, I am considering implementing a fluid transaction cost per transaction. This will require more research so I can justify whichever approach I choose to use. I will also be looking at incorporating slippage into the engine.
-
-- Data visualization
-This is more of an additional feature to the engine and strategy testing. I will implement this change when I'm happy with other factors I wish to improve and change. I am looking at matplotlib, plotly, and seaborn for this development. The visualization will be planned more thoroughly at a later stage, but the basic idea of it is to visualize performance and risk characteristics of trading strategies with the use of ex. scatterplots. 
-
-- Different market conditions
-I am looking to develop functions for the engine where strategies can be tested under specific market conditions. This is a suggestion I received that I thought sounded very cool so I will start working on that at some point. In an advanced stage, this would also include simulated scenarios in past time. Don't expect this to happen soon, but I hope at some point I will show some developments regarding this.
-
-- Hedge strategies and portfolio insurance
-These are to my understanding very commonplace in practical portfolio management practices. For the uninformed reader, a quick review of these concepts will tell you that these are easy to implement and are quite normal. This is a very important development for this code to have any validity. I will be updating this point with a dedicated research document.
-
-
-
+In total, 7140 stocks are included in the list and information is included on ticker, name, market cap, country of origin, IPO year, volume, sector, and industry. This data is included since it could be used for creating potential strategies. The list includes stocks from 12 different sectors and 150 different industries. 833 stocks don't have an associated sector or industry. All stocks in the file are traded on either NASDAQ, NYSE, or AMEX. The stocks are originally based in 59 different countries.
