@@ -1,43 +1,60 @@
 # Base-Engine-1
 This is version 1 of a backtesting engine I am developing. The desired result of this project is to build a backtesting environment that I can use for my future projects. Please let me know If you have any suggestions regarding the project. 
 
-The idea is to first create this backtesting environment, and then use this engine as it is for any other projects. In this first version, I will simply develop a script that requires the user to manually enter the trading strategy that it tests. One day I hope to update the code so it can be applied as a program, which could allow for more simplicity and maintenance.
+### Project description
+My project gathers stock data for all the given stock tickers for a given timeframe. It then determines enter and exit signals and formats a data frame to reflect these signals. Then it calculates a realized return metric in a column called "total equity". It prints a final data frame with individual asset investment returns and the total portfolio returns.
 
-The code uses four different libraries and is broken down into six different defined functions. I have chosen to include a specific run script because I have been taught it makes the code more readable. In its current form, the script requires a stock ticker to be entered in a prompt, and six other variables are defined in the run script. 
+The code uses five different libraries and is broken down into 11 different defined functions.
 
-**Purpose of the engine**
-The purpose of the engine is simple. A strategy is defined and the engine calculates the net profit from this strategy. Currently, the operator will need to enter a stock ticker which the strategy can invest in. Please 
+#### Libraries
+**NumPy**: Used in 9 instances to manage the data frame where all of the data is stored.
+**Pandas**: Used for managing the data frame in one instance. Since it is only used in one instance and the usage seems to overlap with NumPy as of now, I will take a look at it and try to streamline the library usage. 
+**YFinance**: This library is used to pull stock prices for the tickers used in the backtesting environment. It is free and semi-efficient which is why I am using it.
+**Datetime**: I use it to define the timeframe where the strategy is applied. It is therefore used in 9 instances.
+**MatPlotLib**: MatPlotLib is used for visual aids. I am going to keep using it since it is versatile and I know how to use the library pretty well.
 
-**Structure of the code**
-1. Libraries
-2. Stock data
-3. Define a trading strategy
-4. Define a market position function
-5. Define a backtesting function
+#### Defined functions
+**stockdata**: This function downloads the stock data for a given ticker in a given time frame. The ticker and the timeframe are defined in the apply_trading_system_to_portfolio function. The stockdata function is used in the apply_trading_system_to_portfolio function.
+**SMA**: SMA stands for simple moving average. The SMA function exists to create the smaXX and smaYY variables in other parts of the project. The variables are created in multiple instances in the project. The function calculates the mean of stock prices during a given period before the day in question. This creates a lower and higher SMA.
+**crossover and crossunder**: The crossover and crossunder functions are used with smaXX and smaYY to define periods when the differences in SMAs are enough to justify an exit or enter signal. These functions together with the SMA function are highly specific to the trading strategy I am testing my strategy with.
+**apply_trading_system**: This function uses the enter and exit signals to create the market_position column in the data frame. The data from this column is used to create easy commands for when a position is entered and when it is exited. The function also creates the entry_price and exit_price columns so returns can be more easily calculated during the entire timeframe. Entry_price is calculated as the close price when market_position has been switched from 0 to 1 (i.e. when an investment has been made). Exit_price is similar and sets the exit price to the close price when the market position switches from 1 to 0 (i.e. when the trading strategy determines that a position is no longer justified). The function returns the variable 'closed_equity' which is used to calculate the market value of uninvested capital.
+**log_signals and debug_price_changes**: These are two functions that are unused in the project but included for debugging purposes when work on the project continues. If anybody has any ideas for what to use these functions for then let me know.
+**update_signals**: This function is used to allow the user to not only do a long strategy but also a short strategy. The only difference it makes it that swaps the definitions for an enter_pos and an exit_pos when. To understand this further I recommend your own research on long and short positions.
+**compute_positions_and_operations**: This function calculates three columns for the data frame. It calculates the number_of_stocks, operations, and closed equity. Number_of_stocks is calculated as the number of stocks that can be purchased at the entry price, and then rounded down to closest whole number since this strategy does not include buying fractions of stocks. The operations variable is calculated as the changes in capital at each position change. This is then used to calculate closed_equity, which is the cumulative sum of the operations column.
+**plot_trading_signals**: The function is used to create a chart which includes the daily close stock prices and both moving averages. The function is unused as of now but included in line 59 is the line of code as comment. This function will show the chart for each individual asset in the trading strategy. Y-axis is the price, and the x-axis is the time.
+**apply_trading_system_to_portfolio**: The function defines the timeframe for the trading strategy simulation, it initiates the gathering of stock data, defines parameters, and calculates the total equity which is then given as a .csv file (doesn't work right now). Further notes on parameters are found a later stage of the README file. 
 
-Steps 1-3 are relatively simple and thus don't contain too many comments. For additional knowledge about the libraries used in this project, please consult the documentation by the authors of these libraries.
+### Problems encountered
+I have not measured the system performance in any way, so I cannot comment on how efficient the project is from a system performance point of view. 
+1. A significant point of inefficiency is the gathering of stock data. I plan on making this process more efficient by only gathering stock data that is relevant. Right now it gathers all information that yf.download gives. This essentially gathers data on 7 difference variables, of which only date and close price are actually used. Changing the script so only date and close price are downloaded would persumeably decrease run-time significantly.
+2. Changing parameters is right now tedious. They are spread out over the script and one would have to read the readme file to find each spot where changes should be made. A cleaner way to adjust parameters is needed.
+3. Downloading the .csv file of portfolio_results doesn't work right now. I am going to work on this so that in the next version a proper .csv file is downloaded with daily data on portfolio equity changes.
+4. Unused variables are present right now, such as in the compute_positions_and_operations definition. I will take a look at each variable and determine where cuts can be made.
+5. Some definitions exist only for debugging purposes and should not be present in the project file. I will remove these in future updates.
+6. In testing, I encountered problems when there is not sufficient stock data for the given time period. This means that I would need to implement a feature where guidelines are established for stocks that are not listed for the whole time period.
+7. The operation_money and costs parameters are not too well planned right now, I will need to make some adjustments for these so they reflect real conditions a bit better. 
 
-For this project, I am using the yf.download command of yfinance. In its current form, it returns the daily stock prices as far back as 5100 days from the start date, which is the current date of the operator. It pulls the daily price data of the stock ticker that is given in the input function. 
-Yfinance is suitable for now but might need some adjustments when I start implementing wider markets into this engine. Stay tuned for this update, as it will scale up the hardware requirements of this project. My idea is to introduce multithreading features to the engine so data pull requests are streamlined, I will also need to consider if I should switch to for example AlphaVantage's API when the size of pull requests starts getting larger. I will also for formality's sake change the end date of the engine to be 60 days backwards from the current date.
+### Future feature implementations
+Other than fixing current issues, I hope to implement some more features in the project. I have listed some of the more notable features which I hope to implement in my project.
+1. Measures of risk: I hope to include some measures of portfolio risk. The returns of an investing strategy can easily be explained by the returns compensating the risk that the investor takes when implementing these strategies. I plan on implementing the Sharpe ratio of the portfolio and show the risk-adjusted returns of the portfolio. Other than Sharpe ratio, I would include metrics such as volatility, drawdown, Value at Risk, expected shortfall, beta, Sortino ratio, tail risk, and liquidity risk. These are a lot of measures but I will take a look at each one to determine the best way to visualize the risk profile of the trading strategy. 
+2. Regression analysis: A trading strategy can't be purely evaluated based on the returns it would have generated in historical periods. A regression analysis would allow the user to gain insights into what effect certain independent variables have on the dependent variable (stock price). This would allow the investor to gain insight into how much effect the trading strategy has on profitability relative to other measures. This would be a major implementation and much about the project would likely change. 
+3. Diverse statistical tests: To compare the results to the general market, I would implement certain statistical tests where the risk-adjusted return of the portfolio is compared to the risk-adjusted return of a benchmark portfolio during the same time period. I would use the S&P500 as the benchmark portfolio and probably use a t-test to determine if there is a difference in risk-adjusted returns.
+4. A more practical display of results: A matter of human nature is that the more information there is on screen, the less likely a human operator is to read all of it. I want to implement a system for displaying the most relevant information for the user so that the program is more usable and the results are easier to interpret. I am looking at ways to download a summary of all the results so the user gets a practical view of the raw information but summarized.
 
+### Notes on trading strategy
 The trading strategy that is used in the current code is a Double Moving Averages Crossover strategy. I won't go into detail in this version of the readme what this strategy is. It is simply a placeholder strategy. The short explanation of the strategy is that a long position is entered when the SMA (Simple Moving Average) of the shorter period (in this case 30 days) is higher than the longer period SMA (200 days). It exits this position when the opposite is true. The idea is that an operator will be able to code in their desired trading strategy and the engine will run and create a report. This will be further implemented in a future update.
 
-Step 4 implements active trading and holding since the strategies will often mean multiple different enter and exit signals. I will need to refine this when multiple different assets are analyzed simultaneously.
-
-Step 5 formats the data to create the final backtesting environment. I will need to refine this further as there are some inefficiencies in the apply_trading_system function. Backtesting is especially implemented in this function since the transaction costs, type of asset, starting available capital, long or short, order type, and entry levels are incorporated into the simulated performance.
-
 # Notes on data used
-
 Modern literature and discussions with industry professionals have highlighted the importance of data validation and verification when it comes to a system like the one I am attempting to create. Any aspiring trader who wishes to backtest their strategies and gain insight into using them in real markets will need to understand the limitations that come with the certain packages and techniques that I have employed in the creation of this engine.
 
-## Yfinance
+### Yfinance
 The limit of the public API is 2000 requests per day. I will need to analyze the exact implications of this for my project. No matter the result I will need to consider this specifically for the engine when writing the code. Furthermore, the request limit might cause problems when strategies become more complex and more assets and types of derivatives are considered for investment. 
 
 A problem with the use of yfinance is that intraday data is very limited. 1m data is available only for the last 7 days, and <1d data is available for the last 60 days only. This means that any testing of ex. HFT strategies would have a very limited timeframe. Therefore, one might conclude that as long as yfinance is used to retrieve price data, the engine is very limited in backtesting HFT strategies. 
 
 A problem with yfinance is that it retrieves data through HTML scraping on Yahoo Finance. The accuracy of the price data can be compromised by changes on the Yahoo Finance website. There is also the risk of getting rate limited or blacklisted. This is a risk with any web scraping method but this engine retrieves 36,414 million data points and therefore the risk becomes considerably bigger.
 
-## Retreiving stock tickers
+### Retreiving stock tickers
 I have decided to for the time being use a CSV file that contains currently traded stocks on public markets. I chose this method so my engine would be utilizing the whole market and not just a compiled list of more popular stocks (i.e. S&P500 or DJI). The data on currently traded stocks is found on the NASDAQ website (accessible from https://www.nasdaq.com/market-activity/stocks/screener). A CSV file was downloaded on the 16th of April 2024 and I only removed price-related information since the engine is getting that from Yfinance.
 
 In total, 7140 stocks are included in the list and information is included on ticker, name, market cap, country of origin, IPO year, volume, sector, and industry. This data is included since it could be used for creating potential strategies. The list includes stocks from 12 different sectors and 150 different industries. 833 stocks don't have an associated sector or industry. All stocks in the file are traded on either NASDAQ, NYSE, or AMEX. The stocks are originally based in 59 different countries.
