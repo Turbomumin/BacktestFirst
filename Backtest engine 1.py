@@ -275,5 +275,3 @@ if __name__ == "__main__":
 
     # Mann Whitney U-test
     # Monte Carlo to test for performance and risk during varying market conditions
-    ## Tie this with testing on assets correlations and betas so a more "realistic market" can be simulated
-    
